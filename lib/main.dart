@@ -1,7 +1,6 @@
 import 'package:ez_debt/dependency_container.dart';
 import 'package:ez_debt/src/cubit/settings/settings_cubit.dart';
 import 'package:ez_debt/src/cubit/tenant_cubit.dart';
-import 'package:ez_debt/src/shared/constants.dart';
 import 'package:ez_debt/src/shared/routes/routes.dart';
 import 'package:ez_debt/src/shared/themes/app_theme.dart';
 import 'package:flutter/material.dart';
@@ -15,15 +14,11 @@ Future<void> main() async {
 
   final prefs = await SharedPreferences.getInstance();
 
-  final isDarkModeEnabled = prefs.getBool(kDarkModekey);
+  final settingsCubit = SettingsCubit(prefs)..loadSettings();
 
   final blocProviders = [
-    BlocProvider(
-      create: (context) => SettingsCubit(
-        prefs,
-        isDarkModeEnabled: isDarkModeEnabled,
-      ),
-      lazy: false,
+    BlocProvider.value(
+      value: settingsCubit,
     ),
     BlocProvider(
       create: (context) => s1<TenantCubit>(),
@@ -50,21 +45,21 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<SettingsCubit, SettingsState>(
       builder: (context, state) {
-        final isDarkModeEnabled = state.appSettings.isDarkModeEnabled;
-
-        final themeMode = isDarkModeEnabled ? ThemeMode.dark : ThemeMode.light;
-
-        return MaterialApp.router(
-          routerConfig: routes,
-          debugShowCheckedModeBanner: false,
-          theme: getLightTheme(context),
-          darkTheme: getDarkTheme(context),
-          themeMode: themeMode,
+        return state.when(
+          onData: (settings) {
+            return MaterialApp.router(
+              routerConfig: routes,
+              debugShowCheckedModeBanner: false,
+              theme: getLightTheme(context),
+              darkTheme: getDarkTheme(context),
+              themeMode:
+                  settings.isDarkModeEnabled ? ThemeMode.dark : ThemeMode.light,
+            );
+          },
         );
       },
       buildWhen: (previous, current) =>
-          previous.appSettings.isDarkModeEnabled !=
-          current.appSettings.isDarkModeEnabled,
+          previous.data!.isDarkModeEnabled != current.data!.isDarkModeEnabled,
     );
   }
 }

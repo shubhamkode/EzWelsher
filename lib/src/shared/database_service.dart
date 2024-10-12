@@ -101,6 +101,7 @@ class DatabaseService {
   Future<void> deleteTenant(Id id) async {
     final Isar db = await _db;
     await db.writeTxn(() async {
+      await db.entries.filter().tenant((t) => t.idEqualTo(id)).deleteAll();
       await db.tenants.delete(id);
     });
   }

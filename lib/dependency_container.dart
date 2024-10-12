@@ -14,4 +14,5 @@ Future<void> initializeDependency() async {
       s1<DatabaseService>(),
     ),
   );
+
 }

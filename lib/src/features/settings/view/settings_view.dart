@@ -106,10 +106,14 @@ class SettingsView extends StatelessWidget {
               .make(),
           trailing: BlocBuilder<SettingsCubit, SettingsState>(
             builder: (context, state) {
-              return Switch(
-                value: state.appSettings.isDarkModeEnabled,
-                onChanged: (value) async {
-                  await context.read<SettingsCubit>().toggleDarkMode();
+              return state.when(
+                onData: (data) {
+                  return Switch(
+                    value: data.isDarkModeEnabled,
+                    onChanged: (value) async {
+                      await context.read<SettingsCubit>().toggleDarkMode();
+                    },
+                  );
                 },
               );
             },

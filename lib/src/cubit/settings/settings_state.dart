@@ -8,20 +8,4 @@ class Settings {
   });
 }
 
-@immutable
-sealed class SettingsState {
-  // final SettingsModel settings;
-  final Settings appSettings;
-
-  const SettingsState({
-    required this.appSettings,
-  });
-
-  // const SettingsState({required this.settings});
-}
-
-final class SettingsLoaded extends SettingsState {
-  const SettingsLoaded({
-    required super.appSettings,
-  });
-}
+typedef SettingsState = AsyncValue<Settings>;

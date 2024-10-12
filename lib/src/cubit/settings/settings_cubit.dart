@@ -1,6 +1,6 @@
+import 'package:ez_debt/src/shared/async_state.dart';
 import 'package:ez_debt/src/shared/constants.dart';
-import 'package:flutter/material.dart';
-import 'package:hydrated_bloc/hydrated_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 part 'settings_state.dart';
@@ -8,13 +8,10 @@ part 'settings_state.dart';
 class SettingsCubit extends Cubit<SettingsState> {
   final SharedPreferences _preferences;
 
-  SettingsCubit(this._preferences,{
-    bool? isDarkModeEnabled,
-  }) : super(
-          SettingsLoaded(
-            appSettings: Settings(
-              isDarkModeEnabled: isDarkModeEnabled ?? false,
-            ),
+  SettingsCubit(this._preferences)
+      : super(
+          const AsyncValue(
+            data: Settings(),
           ),
         );
 
@@ -28,25 +25,15 @@ class SettingsCubit extends Cubit<SettingsState> {
   Future<void> loadSettings() async {
     final settings = await getSettings();
     emit(
-      SettingsLoaded(
-        appSettings: settings,
-      ),
+      AsyncValue(data: settings),
     );
   }
 
   Future<void> toggleDarkMode() async {
-    // emit(
-    //   SettingsLoaded(
-    //     appSettings: Settings(
-    //       isDarkModeEnabled: !state.appSettings.isDarkModeEnabled,
-    //     ),
-    //   ),
-    // );
     await _preferences.setBool(
       kDarkModekey,
-      !state.appSettings.isDarkModeEnabled,
+      !state.data!.isDarkModeEnabled,
     );
     loadSettings();
   }
-
 }

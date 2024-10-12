@@ -29,15 +29,18 @@ class _TenantDetailsViewState extends State<TenantDetailsView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _buildAppBar(context),
-      body: BlocBuilder<TenantCubit, TenantCubitState>(
+      body: BlocBuilder<TenantCubit, TenantState>(
         builder: (context, state) {
-          if (state is TenantCubitLoaded) {
-            return _buildBody(
-              context,
-              tenant: state.tenant,
-            );
-          }
-          return const CircularProgressIndicator().centered();
+          return state.when(
+            onLoading: () => const CircularProgressIndicator().centered(),
+            onErr: (errMsg) => const CircularProgressIndicator().centered(),
+            onData: (tenant) {
+              return _buildBody(
+                context,
+                tenant: tenant,
+              );
+            },
+          );
         },
       ),
       floatingActionButton: _buildFloatingActionButton(context),
@@ -103,18 +106,21 @@ class _TenantDetailsViewState extends State<TenantDetailsView> {
     return FlatList(
       list: sortType == EntrySort.asc ? entries.reversed.toList() : entries,
       widget: (entry) => EntryTile(entry: entry),
-      onEmpty: VStack(crossAlignment: CrossAxisAlignment.center, [
-        "No entries found"
-            .text
-            .bodyMedium(context)
-            .color(context.colors.onSurface.withOpacity(0.5))
-            .make(),
-        "( Add new entry to get started )"
-            .text
-            .base
-            .color(context.colors.onSurface.withOpacity(0.5))
-            .make(),
-      ]).centered(),
+      onEmpty: VStack(
+        crossAlignment: CrossAxisAlignment.center,
+        [
+          "No entries found"
+              .text
+              .bodyMedium(context)
+              .color(context.colors.onSurface.withOpacity(0.5))
+              .make(),
+          "( Add new entry to get started )"
+              .text
+              .base
+              .color(context.colors.onSurface.withOpacity(0.5))
+              .make(),
+        ],
+      ).centered(),
     );
   }
 
@@ -133,56 +139,59 @@ class TenantAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<TenantCubit, TenantCubitState>(
+    return BlocBuilder<TenantCubit, TenantState>(
       builder: (context, state) {
-        if (state is TenantCubitLoaded) {
-          return AppBar(
-            forceMaterialTransparency: true,
-            leadingWidth: 70.w,
-            leading: Row(
-              children: [
-                const Icon(Icons.arrow_back).pOnly(left: 8.w, right: 4.w),
-                CircleAvatar(
-                  child: state.tenant.name?[0].text.medium.make(),
-                )
+        return state.when(
+          onErr: (errMsg) => "Something Went Wrong".text.makeCentered(),
+          onLoading: () => AppBar(),
+          onData: (tenant) {
+            return AppBar(
+              forceMaterialTransparency: true,
+              leadingWidth: 70.w,
+              leading: Row(
+                children: [
+                  const Icon(Icons.arrow_back).pOnly(left: 8.w, right: 4.w),
+                  CircleAvatar(
+                    child: tenant.name?[0].text.medium.make(),
+                  )
+                ],
+              ).onTap(context.pop),
+              title: "${tenant.name}"
+                  .text
+                  .labelLarge(context)
+                  .make()
+                  .wFull(context)
+                  .onTap(() {
+                context.push("/tenants/${tenant.id}/edit");
+              }),
+              actions: [
+                IconButton(
+                  onPressed: () async {
+                    final url = Uri.parse("tel:${tenant.contact}");
+                    if (await canLaunchUrl(url)) {
+                      await launchUrl(url);
+                    }
+                  },
+                  icon: const Icon(
+                    Icons.call_outlined,
+                  ),
+                ),
+                IconButton(
+                  onPressed: () {
+                    // TODO:- Set Notification Reminder for a tenant
+                  },
+                  icon: const Icon(
+                    Icons.notifications_outlined,
+                  ),
+                ),
               ],
-            ).onTap(context.pop),
-            title: "${state.tenant.name}"
-                .text
-                .labelLarge(context)
-                .make()
-                .wFull(context)
-                .onTap(() {
-              context.push("/tenants/${state.tenant.id}/edit");
-            }),
-            actions: [
-              IconButton(
-                onPressed: () async {
-                  final url = Uri.parse("tel:${state.tenant.contact}");
-                  if (await canLaunchUrl(url)) {
-                    await launchUrl(url);
-                  }
-                },
-                icon: const Icon(
-                  Icons.call_outlined,
-                ),
+              bottom: PreferredSize(
+                preferredSize: Size.fromHeight(1.h),
+                child: const Divider(),
               ),
-              IconButton(
-                onPressed: () {
-                  // TODO:- Set Notification Reminder for a tenant
-                },
-                icon: const Icon(
-                  Icons.notifications_outlined,
-                ),
-              ),
-            ],
-            bottom: PreferredSize(
-              preferredSize: Size.fromHeight(1.h),
-              child: const Divider(),
-            ),
-          );
-        }
-        return AppBar();
+            );
+          },
+        );
       },
     );
   }

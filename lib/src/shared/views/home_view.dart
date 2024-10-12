@@ -3,6 +3,7 @@ import 'package:ez_debt/src/cubit/tenant_cubit.dart';
 import 'package:ez_debt/src/features/entries/models/entries.dart';
 import 'package:ez_debt/src/features/tenant/models/tenant.dart';
 import 'package:ez_debt/src/features/tenant/widgets/tenant_tile.dart';
+import 'package:ez_debt/src/shared/async_state.dart';
 import 'package:ez_debt/src/shared/database_service.dart';
 import 'package:ez_debt/src/widgets/dashboard.dart';
 import 'package:ez_debt/src/widgets/flat_list.dart';
@@ -52,11 +53,12 @@ class _HomeViewState extends State<HomeView> {
   _buildBody(BuildContext context) {
     return VStack(
       [
-        BlocListener<TenantCubit, TenantCubitState>(
+        BlocListener<TenantCubit, TenantState>(
+          listenWhen: (previous, current) {
+            return current is AsyncValue;
+          },
           listener: (context, state) {
-            if (state is TenantCubitLoaded) {
-              setState(() {});
-            }
+            setState(() {});
           },
           child: StreamBuilder(
             stream: s1<DatabaseService>().listenToEntries(),
@@ -101,7 +103,11 @@ class _HomeViewState extends State<HomeView> {
               return FlatList(
                 list: tenants,
                 widget: (tenant) => TenantTile(tenant: tenant),
-                onEmpty: "No Tenants Found".text.makeCentered(),
+                onEmpty: "No tenants found"
+                    .text
+                    .bodyMedium(context)
+                    .color(context.colors.onSurface.withOpacity(0.5))
+                    .makeCentered(),
               );
             }
 

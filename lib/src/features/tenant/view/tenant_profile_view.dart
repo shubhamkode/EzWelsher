@@ -16,26 +16,29 @@ class TenantProfileView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<TenantCubit, TenantCubitState>(
+    return BlocBuilder<TenantCubit, TenantState>(
       builder: (ctx, state) {
-        if (state is TenantCubitLoaded) {
-          return TenantForm(
-            tenant: state.tenant,
-            onSave: (tenant) {
-              if (tenant != null) {
-                s1<DatabaseService>().createNewTenant(tenant: tenant);
-                context.read<TenantCubit>().refetchTenant();
-                context.pop();
-              }
-            },
-            onDelete: () {
-              s1<DatabaseService>().deleteTenant(state.tenant.id);
-              context.read<TenantCubit>().reset();
-              context.pop();
-            },
-          );
-        }
-        return const CircularProgressIndicator().centered();
+        return state.when(
+          onErr: (errMsg) => const CircularProgressIndicator().centered(),
+          onLoading: () => const CircularProgressIndicator().centered(),
+          onData: (tenant) {
+            return TenantForm(
+              tenant: state.data,
+              onSave: (tenant) {
+                if (tenant != null) {
+                  s1<DatabaseService>().createNewTenant(tenant: tenant);
+                  // context.read<TenantCubit>().invalidateSelf();
+                  context.pop();
+                }
+              },
+              onDelete: () {
+                s1<DatabaseService>().deleteTenant(state.data!.id);
+                context.read<TenantCubit>().reset();
+                context.go("/");
+              },
+            );
+          },
+        );
       },
     );
   }

@@ -20,11 +20,15 @@ class EditEntryView extends StatelessWidget {
   }
 
   _buildBody(BuildContext context) {
-    return BlocBuilder<TenantCubit, TenantCubitState>(
+    return BlocBuilder<TenantCubit, TenantState>(
       builder: (context, state) {
-        if (state is TenantCubitLoaded) {
+        return state.when(
+          onErr: (msg) => const CircularProgressIndicator().centered(),
+          onLoading: ()=> const CircularProgressIndicator().centered(),
+          onData: (tenant){
+
           final entry =
-              state.tenant.entries.filter().idEqualTo(entryId).findFirstSync();
+              tenant.entries.filter().idEqualTo(entryId).findFirstSync();
           return EntryForm(
             entry: entry,
             onSave: (entry) {
@@ -38,8 +42,11 @@ class EditEntryView extends StatelessWidget {
               context.pop();
             },
           );
-        }
-        return const CircularProgressIndicator().centered();
+          }
+        );
+        // if (state is TenantCubitLoaded) {
+        // }
+        // return const CircularProgressIndicator().centered();
       },
     );
   }
