@@ -53,12 +53,6 @@ final settingsGroups = {
   ],
   "General Settings": [
     SettingsOption(
-      title: "DateFormat",
-      subtitle: "Select date format",
-      icon: Icons.event_rounded,
-      href: "/settings/language",
-    ),
-    SettingsOption(
       title: "Backup & Restore",
       subtitle: "Backup Progress on google drive",
       icon: Icons.backup_rounded,

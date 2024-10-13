@@ -31,7 +31,7 @@ class _HomeViewState extends State<HomeView> {
 
   _buildAppBar(BuildContext context) {
     return AppBar(
-      title: "EzDebt".text.labelLarge(context).make(),
+      title: "EzWelsher".text.labelLarge(context).make(),
       actions: [
         IconButton(
           onPressed: () {

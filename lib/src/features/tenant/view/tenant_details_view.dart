@@ -121,6 +121,8 @@ class _TenantDetailsViewState extends State<TenantDetailsView> {
               .make(),
         ],
       ).centered(),
+    ).pOnly(
+      left: 4.w,
     );
   }
 
