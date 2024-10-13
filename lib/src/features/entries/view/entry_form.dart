@@ -386,25 +386,29 @@ class AmountField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
-      enableInteractiveSelection: !readOnly,
-      enabled: !readOnly,
-      controller: controller,
-      decoration: InputDecoration(
-        contentPadding: EdgeInsets.symmetric(
-          vertical: 10,
-          horizontal: 12.w,
+        enableInteractiveSelection: !readOnly,
+        enabled: !readOnly,
+        controller: controller,
+        decoration: InputDecoration(
+          // contentPadding: EdgeInsets.symmetric(
+          //   vertical: 10,
+          //   horizontal: 12.w,
+          // ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8.r),
+          ),
+          hintText: hintText,
+          // hintStyle: context.textTheme.labelMedium?.copyWith(
+          //   color: context.colors.onSurface.withOpacity(0.8),
+          // ),
         ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8.r),
-        ),
-        hintText: hintText,
-      ),
-      readOnly: readOnly,
-      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-      style: context.textTheme.titleMedium?.copyWith(
-        color: context.colors.onSurface,
-        fontWeight: FontWeight.normal,
-      ),
-    );
+        readOnly: readOnly,
+        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        style: context.textTheme.labelMedium
+        // style: context.textTheme.titleMedium?.copyWith(
+        //   color: context.colors.onSurface,
+        //   fontWeight: FontWeight.normal,
+        // ),
+        );
   }
 }

@@ -14,48 +14,82 @@ class Dashboard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return HStack(
-      axisSize: MainAxisSize.max,
-      alignment: MainAxisAlignment.spaceBetween,
-      [
-        HStack(
+    return HStack([
+      HStack(
+          axisSize: MainAxisSize.max,
+          alignment: MainAxisAlignment.spaceBetween,
           [
-            VStack(
-              crossAlignment: CrossAxisAlignment.center,
-              [
-                formatAmount(context, recievedAmt),
-                "(Recieved)".text.emerald500.base.make(),
-              ],
-            ),
-            10.w.widthBox,
+            ScoreCard(
+              amount: recievedAmt,
+              hint: "Recived",
+            ).wOneForth(context),
             const Icon(Icons.remove_rounded),
-            10.w.widthBox,
-            VStack(
-              crossAlignment: CrossAxisAlignment.center,
-              [
-                formatAmount(context, paidAmt * -1),
-                "(Sent)".text.base.rose500.make(),
-              ],
-            ),
-          ],
-        ),
-        const Icon(Icons.arrow_forward_rounded),
-        // 40.w.widthBox,
-        VStack(
-          crossAlignment: CrossAxisAlignment.center,
-          [
-            formatAmount(context, recievedAmt - paidAmt),
-            "(Balance)"
-                .text
-                .color(
-                  (recievedAmt - paidAmt).isNegative
-                      ? Vx.rose500
-                      : Vx.emerald500,
-                )
-                .base
-                .make(),
-          ],
-        ),
+            ScoreCard(
+              amount: paidAmt * -1,
+              hint: "Paid",
+            ).wOneForth(context),
+          ]).expand(),
+      HStack([
+        const Icon(Icons.arrow_forward_outlined),
+        20.w.widthBox,
+        ScoreCard(
+          amount: recievedAmt - paidAmt,
+          hint: "Balance",
+        ).wOneForth(context),
+      ])
+    ]);
+    // return HStack(
+    //   axisSize: MainAxisSize.max,
+    //   alignment: MainAxisAlignment.spaceBetween,
+    //   [
+    //     HStack(
+    //       [
+    //         ScoreCard(
+    //           amount: recievedAmt,
+    //           hint: "Recieved",
+    //         ),
+    //         10.w.widthBox,
+    //         const Icon(Icons.remove_rounded),
+    //         10.w.widthBox,
+    //         ScoreCard(
+    //           amount: paidAmt * -1,
+    //           hint: "Sent",
+    //         ),
+    //       ],
+    //     ),
+    //     const Icon(Icons.arrow_forward_rounded),
+    //     // 40.w.widthBox,
+    //     ScoreCard(
+    //       amount: recievedAmt - paidAmt,
+    //       hint: "Balance",
+    //     ),
+    //   ],
+    // );
+  }
+}
+
+class ScoreCard extends StatelessWidget {
+  final double amount;
+  final String hint;
+  const ScoreCard({
+    super.key,
+    required this.amount,
+    required this.hint,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return VStack(
+      crossAlignment: CrossAxisAlignment.center,
+      [
+        formatAmount(context, amount),
+        "($hint)"
+            .text
+            .color(
+              (amount).isNegative ? Vx.rose500 : Vx.emerald500,
+            )
+            .base
+            .make(),
       ],
     );
   }

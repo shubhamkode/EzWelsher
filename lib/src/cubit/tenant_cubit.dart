@@ -2,7 +2,6 @@ import 'package:ez_debt/src/features/entries/models/entries.dart';
 import 'package:ez_debt/src/features/tenant/models/tenant.dart';
 import 'package:ez_debt/src/shared/async_state.dart';
 import 'package:ez_debt/src/shared/database_service.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 part 'tenant_state.dart';
@@ -22,7 +21,6 @@ class TenantCubit extends Cubit<TenantState> {
 
   Future<void> invalidateSelf() async {
     if (state.data != null) {
-      debugPrint("UserId:- ${state.data?.id}");
       return fetchTenant(state.data!.id);
     }
     emit(
@@ -41,14 +39,11 @@ class TenantCubit extends Cubit<TenantState> {
   }
 
   Future<void> updateEntry(Entries updatedEntry) async {
-    await _databaseService.createNewEntry(
-      state.data!.id,
-      updatedEntry,
-    );
+    await _databaseService.updateEntry(updatedEntry);
     invalidateSelf();
   }
 
   Future<void> reset() async {
-    invalidateSelf();
+    emit(const AsyncLoading());
   }
 }

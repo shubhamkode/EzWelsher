@@ -3,7 +3,6 @@ import 'package:ez_debt/src/cubit/tenant_cubit.dart';
 import 'package:ez_debt/src/features/entries/models/entries.dart';
 import 'package:ez_debt/src/features/tenant/models/tenant.dart';
 import 'package:ez_debt/src/features/tenant/widgets/tenant_tile.dart';
-import 'package:ez_debt/src/shared/async_state.dart';
 import 'package:ez_debt/src/shared/database_service.dart';
 import 'package:ez_debt/src/widgets/dashboard.dart';
 import 'package:ez_debt/src/widgets/flat_list.dart';
@@ -51,16 +50,14 @@ class _HomeViewState extends State<HomeView> {
   }
 
   _buildBody(BuildContext context) {
-    return VStack(
-      [
-        BlocListener<TenantCubit, TenantState>(
-          listenWhen: (previous, current) {
-            return current is AsyncValue;
-          },
-          listener: (context, state) {
-            setState(() {});
-          },
-          child: StreamBuilder(
+    return BlocListener<TenantCubit, TenantState>(
+      listenWhen: (previous, current) => current != previous,
+      listener: (context, state) {
+        setState(() {});
+      },
+      child: VStack(
+        [
+          StreamBuilder(
             stream: s1<DatabaseService>().listenToEntries(),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
@@ -75,46 +72,46 @@ class _HomeViewState extends State<HomeView> {
                   paidAmt: getAmountFor(EntryType.paid),
                   recievedAmt: getAmountFor(EntryType.recieved),
                 ).pOnly(
-                  left: 24.w,
+                  left: 12.w,
                   top: 16.h,
                   bottom: 8.h,
-                  right: 24.w,
+                  right: 12.w,
                 );
               } else {
                 return const Dashboard(
                   paidAmt: 0,
                   recievedAmt: 0,
                 ).pOnly(
-                  left: 24.w,
+                  left: 12.w,
                   top: 16.h,
                   bottom: 8.h,
-                  right: 24.w,
+                  right: 12.w,
                 );
               }
             },
           ),
-        ),
-        12.h.heightBox,
-        StreamBuilder(
-          stream: s1<DatabaseService>().listenToTenants(),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              final tenants = snapshot.data!;
-              return FlatList(
-                list: tenants,
-                widget: (tenant) => TenantTile(tenant: tenant),
-                onEmpty: "No tenants found"
-                    .text
-                    .bodyMedium(context)
-                    .color(context.colors.onSurface.withOpacity(0.5))
-                    .makeCentered(),
-              );
-            }
+          12.h.heightBox,
+          StreamBuilder(
+            stream: s1<DatabaseService>().listenToTenants(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                final tenants = snapshot.data!;
+                return FlatList(
+                  list: tenants,
+                  widget: (tenant) => TenantTile(tenant: tenant),
+                  onEmpty: "No tenants found"
+                      .text
+                      .bodyMedium(context)
+                      .color(context.colors.onSurface.withOpacity(0.5))
+                      .makeCentered(),
+                );
+              }
 
-            return const CircularProgressIndicator().centered();
-          },
-        ).expand(),
-      ],
+              return const CircularProgressIndicator().centered();
+            },
+          ).expand(),
+        ],
+      ),
     );
   }
 

@@ -23,27 +23,25 @@ class EditEntryView extends StatelessWidget {
     return BlocBuilder<TenantCubit, TenantState>(
       builder: (context, state) {
         return state.when(
-          onErr: (msg) => const CircularProgressIndicator().centered(),
-          onLoading: ()=> const CircularProgressIndicator().centered(),
-          onData: (tenant){
-
-          final entry =
-              tenant.entries.filter().idEqualTo(entryId).findFirstSync();
-          return EntryForm(
-            entry: entry,
-            onSave: (entry) {
-              if (entry != null) {
-                context.read<TenantCubit>().updateEntry(entry);
-                context.pop();
-              }
-            },
-            onDelete: (int entryId) {
-              context.read<TenantCubit>().deleteEntry(entryId);
-              context.pop();
-            },
-          );
-          }
-        );
+            onErr: (msg) => const CircularProgressIndicator().centered(),
+            onLoading: () => const CircularProgressIndicator().centered(),
+            onData: (tenant) {
+              final entry =
+                  tenant.entries.filter().idEqualTo(entryId).findFirstSync();
+              return EntryForm(
+                entry: entry,
+                onSave: (entry) {
+                  if (entry != null) {
+                    context.read<TenantCubit>().updateEntry(entry);
+                    context.pop();
+                  }
+                },
+                onDelete: (int entryId) {
+                  context.read<TenantCubit>().deleteEntry(entryId);
+                  context.pop();
+                },
+              );
+            });
         // if (state is TenantCubitLoaded) {
         // }
         // return const CircularProgressIndicator().centered();

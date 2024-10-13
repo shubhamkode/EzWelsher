@@ -30,7 +30,7 @@ class DatabaseService {
   }
 
   Future<void> createNewTenant({required Tenant tenant}) async {
-    final db = await _db;
+    final Isar db = await _db;
     db.writeTxnSync(() {
       db.tenants.putSync(tenant);
     });
@@ -93,16 +93,16 @@ class DatabaseService {
 
   Future<void> deleteDatabase() async {
     final Isar db = await _db;
-    await db.writeTxn(() async {
-      await db.clear();
+    db.writeTxnSync(() {
+      db.clearSync();
     });
   }
 
   Future<void> deleteTenant(Id id) async {
     final Isar db = await _db;
-    await db.writeTxn(() async {
-      await db.entries.filter().tenant((t) => t.idEqualTo(id)).deleteAll();
-      await db.tenants.delete(id);
+    db.writeTxnSync(() {
+      db.entries.filter().tenant((t) => t.idEqualTo(id)).deleteAllSync();
+      db.tenants.deleteSync(id);
     });
   }
 }

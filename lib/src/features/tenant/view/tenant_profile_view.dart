@@ -21,18 +21,18 @@ class TenantProfileView extends StatelessWidget {
         return state.when(
           onErr: (errMsg) => const CircularProgressIndicator().centered(),
           onLoading: () => const CircularProgressIndicator().centered(),
-          onData: (tenant) {
+          onData: (tnt) {
             return TenantForm(
-              tenant: state.data,
+              tenant: tnt,
               onSave: (tenant) {
                 if (tenant != null) {
                   s1<DatabaseService>().createNewTenant(tenant: tenant);
-                  // context.read<TenantCubit>().invalidateSelf();
+                  context.read<TenantCubit>().invalidateSelf();
                   context.pop();
                 }
               },
               onDelete: () {
-                s1<DatabaseService>().deleteTenant(state.data!.id);
+                s1<DatabaseService>().deleteTenant(tnt.id);
                 context.read<TenantCubit>().reset();
                 context.go("/");
               },

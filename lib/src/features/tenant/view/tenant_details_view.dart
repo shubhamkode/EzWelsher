@@ -68,10 +68,10 @@ class _TenantDetailsViewState extends State<TenantDetailsView> {
           paidAmt: getAmountFor(EntryType.paid),
           recievedAmt: getAmountFor(EntryType.recieved),
         ).pOnly(
-          left: 24.w,
+          left: 12.w,
           top: 16.h,
           bottom: 8.h,
-          right: 24.w,
+          right: 12.w,
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.end,

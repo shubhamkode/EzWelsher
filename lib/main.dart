@@ -17,12 +17,8 @@ Future<void> main() async {
   final settingsCubit = SettingsCubit(prefs)..loadSettings();
 
   final blocProviders = [
-    BlocProvider.value(
-      value: settingsCubit,
-    ),
-    BlocProvider(
-      create: (context) => s1<TenantCubit>(),
-    ),
+    BlocProvider.value(value: settingsCubit),
+    BlocProvider(create: (context) => s1<TenantCubit>()),
   ];
 
   runApp(

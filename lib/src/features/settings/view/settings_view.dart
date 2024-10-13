@@ -1,4 +1,7 @@
+import 'package:ez_debt/dependency_container.dart';
 import 'package:ez_debt/src/cubit/settings/settings_cubit.dart';
+import 'package:ez_debt/src/shared/database_service.dart';
+import 'package:ez_debt/src/shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -9,30 +12,46 @@ class SettingsOption {
   final String title;
   final IconData icon;
   final String subtitle;
-  final String href;
+  final String? href;
+  final Function(BuildContext context)? onTap;
+  final Widget? trailing;
 
   SettingsOption({
     required this.title,
     required this.icon,
     required this.subtitle,
-    required this.href,
+    this.href,
+    this.onTap,
+    this.trailing,
   });
 }
 
 final settingsGroups = {
+  "Theme Settings": [
+    SettingsOption(
+      title: "Enable Dark Mode",
+      subtitle: "Enable dark mode for the application",
+      icon: Icons.contrast_rounded,
+      onTap: (context) async {
+        await context.read<SettingsCubit>().toggleDarkMode();
+      },
+      trailing: BlocBuilder<SettingsCubit, SettingsState>(
+        builder: (context, state) {
+          return state.when(
+            onData: (data) {
+              return Switch(
+                value: data.isDarkModeEnabled,
+                onChanged: (value) async {
+                  await context.read<SettingsCubit>().toggleDarkMode();
+                },
+              );
+            },
+          );
+        },
+      ),
+    ),
+  ],
   "General Settings": [
-    SettingsOption(
-      title: "Language",
-      subtitle: "Change language",
-      icon: Icons.translate_rounded,
-      href: "/settings/language",
-    ),
-    SettingsOption(
-      title: "Currency",
-      subtitle: "Change currency",
-      icon: Icons.attach_money_rounded,
-      href: "/settings/language",
-    ),
     SettingsOption(
       title: "DateFormat",
       subtitle: "Select date format",
@@ -49,7 +68,42 @@ final settingsGroups = {
       title: "Reset Application",
       subtitle: "Erase all data and reset this application",
       icon: Icons.restart_alt_rounded,
-      href: "/settings/language",
+      // href: "/settings/language",
+      onTap: (context) {
+        showDialog(
+          context: context,
+          builder: (ctx) {
+            return getAlertDialog(
+              title: Text(
+                "Are you Sure?",
+                style: ctx.textTheme.titleMedium,
+              ),
+              subtitle: Text(
+                "All your data will be deleted forever and you won't be able to recover your data.",
+                style: context.textTheme.bodySmall?.copyWith(
+                  color: context.colors.onSurfaceVariant.withOpacity(0.8),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    ctx.pop();
+                  },
+                  child: const Text("Cancel"),
+                ),
+                TextButton(
+                  onPressed: () {
+                    s1<DatabaseService>().deleteDatabase();
+                    ctx.pop();
+                    // context.go("/");
+                  },
+                  child: const Text("Sure"),
+                ),
+              ],
+            );
+          },
+        );
+      },
     ),
   ],
   "Support Us": [
@@ -90,51 +144,39 @@ class SettingsView extends StatelessWidget {
   }
 
   Widget _buildBody(BuildContext context) {
+    final settingTitles = settingsGroups.keys.toList();
+
+    List<SettingsOption> getOptions(String title) {
+      return settingsGroups[title]!;
+    }
+
     return VStack(
       [
-        "Theme Settings".text.titleMedium(context).make().pOnly(
-              left: 12.w,
-              top: 18.h,
-              bottom: 8.h,
-            ),
-        ListTile(
-          leading: const Icon(Icons.contrast_rounded),
-          title: "Enable Dark Mode".text.labelMedium(context).make(),
-          subtitle: "Enable dark mode for the application"
-              .text
-              .bodySmall(context)
-              .make(),
-          trailing: BlocBuilder<SettingsCubit, SettingsState>(
-            builder: (context, state) {
-              return state.when(
-                onData: (data) {
-                  return Switch(
-                    value: data.isDarkModeEnabled,
-                    onChanged: (value) async {
-                      await context.read<SettingsCubit>().toggleDarkMode();
-                    },
-                  );
-                },
-              );
-            },
-          ),
-        ),
-        ...settingsGroups.entries.map(
-          (group) {
+        ListView.builder(
+          shrinkWrap: true,
+          itemCount: settingTitles.length,
+          itemBuilder: (context, index) {
+            final options = getOptions(settingTitles[index]);
+
             return VStack(
               [
-                group.key.text.titleMedium(context).make().pOnly(
+                settingTitles[index].text.titleMedium(context).make().pOnly(
                       left: 12.w,
                       top: 18.h,
                       bottom: 8.h,
                     ),
-                ...group.value.map(
-                  (option) => SettingsTile(option: option),
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const ClampingScrollPhysics(),
+                  itemCount: options.length,
+                  itemBuilder: (context, index) => SettingsTile(
+                    option: options[index],
+                  ),
                 ),
               ],
             );
           },
-        ),
+        ).expand(),
       ],
     );
   }
@@ -142,17 +184,54 @@ class SettingsView extends StatelessWidget {
 
 class SettingsTile extends StatelessWidget {
   final SettingsOption option;
-  const SettingsTile({super.key, required this.option});
+  const SettingsTile({
+    super.key,
+    required this.option,
+  });
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
       onTap: () {
-        context.push(option.href);
+        if (option.href != null) {
+          context.push(option.href!);
+          return;
+        } else if (option.onTap != null) {
+          option.onTap!(context);
+        }
       },
       leading: Icon(option.icon),
       title: option.title.text.labelMedium(context).make(),
       subtitle: option.subtitle.text.bodySmall(context).make(),
+      trailing: option.trailing,
     );
   }
 }
+
+// builder: (ctx) => getalertdialog(
+//     title: Text(
+//       'Delete entry?',
+//       style: context.textTheme.titleMedium,
+//     ),
+//     subtitle: Text(
+//       "Selected entry would be deleted and won't be recoverable.",
+//       style: context.textTheme.bodySmall?.copyWith(
+//         color: context.colors.onSurfaceVariant
+//             .withOpacity(0.8),
+//       ),
+//     ),
+//     actions: [
+//       TextButton(
+//         onPressed: () {
+//           ctx.pop();
+//         },
+//         child: const Text("Cancel"),
+//       ),
+//       TextButton(
+//         onPressed: () {
+//           ctx.pop();
+//           widget.onDelete!(widget.entry!.id);
+//         },
+//         child: const Text("Sure"),
+//       )
+//     ]),

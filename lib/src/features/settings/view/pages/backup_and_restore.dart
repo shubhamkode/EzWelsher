@@ -1,8 +1,5 @@
-import 'package:ez_debt/dependency_container.dart';
-import 'package:ez_debt/src/shared/database_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:go_router/go_router.dart';
 import 'package:velocity_x/velocity_x.dart';
 
 class BackupAndRestore extends StatelessWidget {
@@ -18,11 +15,7 @@ class BackupAndRestore extends StatelessWidget {
 
   _buildAppBar(BuildContext context) {
     return AppBar(
-      automaticallyImplyLeading: false,
       title: "Backup and Restore".text.labelLarge(context).make(),
-      actions: [
-        CloseButton(),
-      ],
       bottom: PreferredSize(
         preferredSize: Size.fromHeight(1.h),
         child: const Divider(),
@@ -31,24 +24,17 @@ class BackupAndRestore extends StatelessWidget {
   }
 
   _buildBody(BuildContext context) {
-    return VStack(
-      [
-        ListTile(
-          leading: Icon(
-            Icons.delete_rounded,
-            color: context.colors.error,
-          ).pOnly(left: 4.w),
-          title: "Delete all data"
-              .text
-              .color(context.colors.error)
-              .labelMedium(context)
-              .make(),
-          onTap: () {
-            s1<DatabaseService>().deleteDatabase();
-            context.replace("/");
-          },
-        ),
-      ],
+    return VStack([
+      "Backup all your data".text.labelMedium(context).make(),
+      5.h.heightBox,
+      "Backup all your tenants and entries into local storage or your google account storage"
+          .text
+          .sm
+          .color(context.colors.onSurface)
+          .make()
+    ]).pSymmetric(
+      v: 16.h,
+      h: 16.w,
     );
   }
 }
